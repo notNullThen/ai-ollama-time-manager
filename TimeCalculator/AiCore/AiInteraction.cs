@@ -10,11 +10,12 @@ public class AiInteraction
 
     public string UserInput { get; set; }
 
+    private AiAppFacade _aiFacade;
 
     public AiInteraction(TimeCalculatorProgramm timeCalculator)
     {
-        var aiFacade = new AiAppFacade(timeCalculator);
-        AiManager = new(modelName: _modelName, appInstance: aiFacade);
+        _aiFacade = new AiAppFacade(timeCalculator);
+        AiManager = new(modelName: _modelName, appInstance: _aiFacade);
         UserInput = string.Empty;
     }
 
@@ -22,7 +23,17 @@ public class AiInteraction
     private const string _modelName = "qwen2.5-coder:7b";
 
 
-    public async Task AskAsync() => await AiManager.StartAsync(UserInput);
+    public async Task AskAsync()
+    {
+        await AiManager.StartAsync(UserInput);
+        Reset();
+    }
 
     public string GetContext() => AiManager.ContextHandler.GetContextJson();
+
+    public void Reset()
+    {
+        AiManager = new(modelName: _modelName, appInstance: _aiFacade);
+        UserInput = string.Empty;
+    }
 }

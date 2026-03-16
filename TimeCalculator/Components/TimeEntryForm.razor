@@ -1,6 +1,7 @@
 @using TimeCalculator.AiCore
 @using TimeCalculator.Core
 @using TimeCalculator.Core.Types
+@using AIOrchestrator.Core.Types
 
 <div class="d-flex flex-column flex-md-row gap-3 align-items-start align-items-md-end">
     <div class="d-flex gap-2 align-items-end">
@@ -64,9 +65,21 @@
 @code {
     [Parameter, EditorRequired] public TimeCalculatorProgramm TimeCalculator { get; set; } = default!;
 
-    public AiInteraction AiInteraction => new(TimeCalculator);
+    public AiInteraction AiInteraction { get; private set; } = default!;
 
     [Parameter] public EventCallback OnChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AiInteraction = new AiInteraction(TimeCalculator);
+        AiInteraction.AiManager.ContextHandler.OnContextUpdated += OnContextUpdated;
+    }
+
+    private void OnContextUpdated(object? sender, List<FunctionCallResponse> e)
+    {
+        _ = NotifyChangedAsync();
+    }
+
 
     private void AddTimeEntry()
     {
