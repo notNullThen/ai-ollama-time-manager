@@ -1,12 +1,13 @@
 @implements IDisposable
 @inject IJSRuntime JS
-@inject TimeCalculator.Services.ThemeService Theme
+@inject Services.ThemeService Theme
 
 <button type="button" class="btn btn-sm theme-toggle" @onclick="Toggle">
     @($"Dark / Light Theme - {ButtonText}")
 </button>
 
 @code {
+
     protected override void OnInitialized()
     {
         Theme.Changed += OnThemeChanged;
@@ -42,4 +43,5 @@
     {
         Theme.Changed -= OnThemeChanged;
     }
+
 }
