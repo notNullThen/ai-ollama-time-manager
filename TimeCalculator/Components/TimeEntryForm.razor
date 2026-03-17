@@ -3,59 +3,65 @@
 @using TimeCalculator.Core.Types
 @using AIOrchestrator.Core.Types
 
-<div class="d-flex flex-column flex-md-row gap-3 align-items-start align-items-md-end">
-    <div class="d-flex gap-2 align-items-end">
-        <div class="d-flex flex-column">
-            <label class="form-label mb-1">Hours</label>
-            <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Hours" min="0" class="form-control"
-                   style="width: 100px;"/>
+<div class="d-flex flex-column flex-lg-row gap-4 align-items-start">
+    <!-- Main Form Controls -->
+    <div class="d-flex flex-column gap-4" style="width: 100%; max-width: 400px;">
+        <!-- Time Inputs -->
+        <div class="d-flex gap-2 align-items-end">
+            <div class="d-flex flex-column">
+                <label class="form-label mb-1">Hours</label>
+                <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Hours" min="0" class="form-control"
+                       style="width: 80px;"/>
+            </div>
+
+            <div class="d-flex flex-column">
+                <label class="form-label mb-1">Minutes</label>
+                <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Minutes" min="0" max="59"
+                       class="form-control" style="width: 80px;"/>
+            </div>
+
+            <div class="d-flex flex-column">
+                <label class="form-label mb-1">Seconds</label>
+                <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Seconds" min="0" max="59"
+                       class="form-control" style="width: 80px;"/>
+            </div>
+
+            <div class="ms-auto">
+                <div class="btn-group" role="group" aria-label="Time entry type">
+                    <button type="button" class="@GetTypeButtonClass(TimeType.Work)"
+                            aria-pressed="@(IsTypeSelected(TimeType.Work))" @onclick="() => TimeCalculator.SetType(TimeType.Work)">
+                        Work
+                    </button>
+                    <button type="button" class="@GetTypeButtonClass(TimeType.Break)"
+                            aria-pressed="@(IsTypeSelected(TimeType.Break))"
+                            @onclick="() => TimeCalculator.SetType(TimeType.Break)">
+                        Break
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="d-flex flex-column">
-            <label class="form-label mb-1">Minutes</label>
-            <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Minutes" min="0" max="59"
-                   class="form-control" style="width: 100px;"/>
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" @onclick="AddTimeEntry">Add Entry</button>
+            <button class="btn btn-outline-primary" @onclick="SetRemainedTime">Remained</button>
         </div>
 
-        <div class="d-flex flex-column">
-            <label class="form-label mb-1">Seconds</label>
-            <input type="number" @bind="TimeCalculator.CurrentTimeEntry.Time.Seconds" min="0" max="59"
-                   class="form-control" style="width: 100px;"/>
+        <hr class="my-0 opacity-10" />
+
+        <!-- AI Assistant Group (Explain + Type nearby) -->
+        <div class="d-flex flex-column gap-2">
+            <label class="form-label mb-1">Explain it - we'll try to do it!</label>
+            <textarea @bind="AiInteraction.UserInput"
+                   class="form-control" style="height: 120px;" placeholder="e.g., 'add 2 hours of work'"></textarea>
+            <button class="btn btn-primary w-100" @onclick="AiInteraction.AskAsync">Do it!</button>
         </div>
     </div>
 
-    <div class="d-flex flex-column flex-grow-1 align-items-start mt-md-0">
-        <label class="form-label mb-1">Type</label>
-        <div class="btn-group" role="group" aria-label="Time entry type">
-            <button type="button" class="@GetTypeButtonClass(TimeType.Work)"
-                    aria-pressed="@(IsTypeSelected(TimeType.Work))" @onclick="() => TimeCalculator.SetType(TimeType.Work)">
-                Work
-            </button>
-            <button type="button" class="@GetTypeButtonClass(TimeType.Break)"
-                    aria-pressed="@(IsTypeSelected(TimeType.Break))"
-                    @onclick="() => TimeCalculator.SetType(TimeType.Break)">
-                Break
-            </button>
-        </div>
-    </div>
-</div>
-
-<div class="mt-3">
-    <button class="btn btn-primary gap-3 mt-3" @onclick="AddTimeEntry">Add Time Entry</button>
-    <button class="btn btn-outline-primary mt-3" @onclick="SetRemainedTime">Add Remained Time</button>
-</div>
-
-<div class="mt-3 d-flex flex-wrap gap-3">
-    <div class="d-flex flex-column">
-        <label class="form-label mb-1">Explain it - we'll try to do it!</label>
-        <textarea @bind="AiInteraction.UserInput"
-               class="form-control" style="width: 400px; height: 100px;"></textarea>
-        <button class="btn btn-primary gap-3 mt-3" @onclick="AiInteraction.AskAsync" style="width: 400px;">Do it!</button>
-    </div>
-
-    <div class="d-flex flex-column">
+    <!-- AI Debug Details Sidebar -->
+    <div class="d-flex flex-column flex-grow-1" style="max-width: 500px;">
         <label class="form-label mb-1">AI Debug Details</label>
-        <div class="form-control" style="width: 400px; height: 300px; overflow-y: auto; display: flex; flex-direction: column-reverse; background-color: var(--tc-surface-2);">
+        <div class="form-control" style="height: 385px; overflow-y: auto; display: flex; flex-direction: column-reverse; background-color: var(--tc-surface-2); border-color: var(--tc-border);">
             <div style="white-space: pre-wrap; font-family: monospace; font-size: 0.8rem; padding: 5px; color: var(--tc-fg);">@AiInteraction.GetContext()</div>
         </div>
     </div>
