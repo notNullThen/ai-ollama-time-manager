@@ -60,9 +60,16 @@
 
     <!-- AI Debug Details Sidebar -->
     <div class="d-flex flex-column flex-grow-1" style="max-width: 500px;">
-        <label class="form-label mb-1">AI Debug Details</label>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label mb-0">AI Debug Details</label>
+            <button class="btn btn-link btn-sm p-0 text-decoration-none" 
+                    onclick="var t=document.getElementById('ai-debug-out').innerText;if(navigator.clipboard){navigator.clipboard.writeText(t)}else{var e=document.createElement('textarea');e.value=t;document.body.appendChild(e);e.select();document.execCommand('copy');document.body.removeChild(e)}this.innerText='Copied!';var b=this;setTimeout(function(){b.innerText='Copy'},2000);" 
+                    style="font-size: 0.75rem;">
+                Copy
+            </button>
+        </div>
         <div class="form-control" style="height: 385px; overflow-y: auto; display: flex; flex-direction: column-reverse; background-color: var(--tc-surface-2); border-color: var(--tc-border);">
-            <div style="white-space: pre-wrap; font-family: monospace; font-size: 0.8rem; padding: 5px; color: var(--tc-fg);">@AiInteraction.GetContext()</div>
+            <div id="ai-debug-out" style="white-space: pre-wrap; font-family: monospace; font-size: 0.8rem; padding: 5px; color: var(--tc-fg);">@AiInteraction.GetContext()</div>
         </div>
     </div>
 </div>
