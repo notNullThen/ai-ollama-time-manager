@@ -11,7 +11,7 @@ public class AiInteraction
 
     public string UserInput { get; set; }
 
-    private AiAppFacade _aiFacade;
+    private readonly AiAppFacade _aiFacade;
 
     public event EventHandler<List<FunctionCallResponse>>? OnContextUpdated;
 
@@ -23,7 +23,7 @@ public class AiInteraction
     }
 
 
-    private const string _modelName = "qwen2.5-coder:7b";
+    private const string ModelName = "qwen2.5-coder:7b";
 
 
     public async Task AskAsync()
@@ -40,7 +40,7 @@ public class AiInteraction
             AiManager.ContextHandler.OnContextUpdated -= InternalOnContextUpdated;
         }
 
-        AiManager = new(modelName: _modelName, appInstance: _aiFacade);
+        AiManager = new(modelName: ModelName, appInstance: _aiFacade);
         AiManager.ContextHandler.OnContextUpdated += InternalOnContextUpdated;
         UserInput = string.Empty;
     }
