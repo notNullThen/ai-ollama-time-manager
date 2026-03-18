@@ -13,29 +13,13 @@ public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFa
     // complex logic with multiple function calls.
     // Otherwise we would have only one function call to set the time entry.
 
-    public object SetHours(int hours)
-    {
-        timeCalculator.SetHours(hours);
-        return GetTimeEntriesTable();
-    }
+    public void SetHours(int hours) => timeCalculator.SetHours(hours);
 
-    public object SetMinutes(int minutes)
-    {
-        timeCalculator.SetMinutes(minutes);
-        return GetTimeEntriesTable();
-    }
+    public void SetMinutes(int minutes) => timeCalculator.SetMinutes(minutes);
 
-    public object SetSeconds(int seconds)
-    {
-        timeCalculator.SetSeconds(seconds);
-        return GetTimeEntriesTable();
-    }
+    public void SetSeconds(int seconds) => timeCalculator.SetSeconds(seconds);
 
-    public object SetType(TimeType type)
-    {
-        timeCalculator.SetType(type);
-        return GetTimeEntriesTable();
-    }
+    public void SetType(TimeType type) => timeCalculator.SetType(type);
 
     public object WriteTimeEntryToTable()
     {
@@ -43,11 +27,7 @@ public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFa
         return GetTimeEntriesTable();
     }
 
-    public void SetRemainedTime()
-    {
-        timeCalculator.SetRemainedTime();
-        // return GetCurrentTimeEntry();
-    }
+    public void SetRemainedTime() => timeCalculator.SetRemainedTime();
 
     public override string GetConstraints() =>
         @$"
