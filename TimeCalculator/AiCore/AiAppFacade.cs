@@ -19,13 +19,17 @@ public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFa
 
     public void SetType(TimeType type) => timeCalculator.SetType(type);
 
-    public object AddTimeEntry()
+    public TimeEntry[] AddTimeEntry()
     {
         timeCalculator.AddTimeEntry();
         return GetTimeEntriesTable();
     }
 
-    public void SetRemainedTime() => timeCalculator.SetRemainedTime();
+    public TimeData SetRemainedTime()
+    {
+        timeCalculator.SetRemainedTime();
+        return timeCalculator.CurrentTimeEntry.Time;
+    }
 
     public override string GetConstraints() =>
         @$"
@@ -89,13 +93,8 @@ Last Unit = ({nameof(SetType)}) -> ({nameof(SetRemainedTime)}) -> ({nameof(AddTi
             },
         ];
 
-    private string GetCurrentTimeEntry()
+    private TimeEntry[] GetTimeEntriesTable()
     {
-        return $"Current Time Entry: {timeCalculator.CurrentTimeEntry.Time.Hours} hours, {timeCalculator.CurrentTimeEntry.Time.Minutes} minutes, {timeCalculator.CurrentTimeEntry.Time.Seconds} seconds. Type: {timeCalculator.CurrentTimeEntry.Type}";
-    }
-
-    private object GetTimeEntriesTable()
-    {
-        return timeCalculator.TimeEntries.Values.ToList();
+        return [.. timeCalculator.TimeEntries.Values];
     }
 }
