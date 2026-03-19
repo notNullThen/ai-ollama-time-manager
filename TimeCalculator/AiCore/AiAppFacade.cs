@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using AIOrchestrator.Core.AiAppFacade;
 using AIOrchestrator.Core.AiAppFacade.Types;
 using TimeCalculator.Core;
@@ -21,7 +19,7 @@ public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFa
 
     public void SetType(TimeType type) => timeCalculator.SetType(type);
 
-    public object WriteTimeEntryToTable()
+    public object AddTimeEntry()
     {
         timeCalculator.AddTimeEntry();
         return GetTimeEntriesTable();
@@ -31,21 +29,16 @@ public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFa
 
     public override string GetConstraints() =>
         @$"
-# TASK: CHRONOLOGICAL LOGGING
-Process the user's timeline step-by-step. 
-
 # THE 'ATOMIC ENTRY' RULE
 Every time entry is an ATOMIC UNIT. You must complete one unit before starting the next.
-One Unit = (SetType) -> (SetHours/Minutes/Seconds) -> (WriteTimeEntryToTable).
+One Unit = ({nameof(SetType)}) -> ({nameof(SetHours)}/{nameof(SetMinutes)}/{nameof(SetSeconds)}) -> ({nameof(AddTimeEntry)}).
+
+Last Unit = ({nameof(SetType)}) -> ({nameof(SetRemainedTime)}) -> ({nameof(AddTimeEntry)}) -> ({nameof(Exit)}).
 
 # CRITICAL LOGIC GATES
-- FORBIDDEN: Calling {nameof(SetType)} twice in a row without {nameof(WriteTimeEntryToTable)} in between.
+- FORBIDDEN: Calling {nameof(SetType)} twice in a row without {nameof(AddTimeEntry)} in between.
 - FORBIDDEN: Calculating a new time segment while a previous segment is still 'Open' (Unwritten).
-- REQUIRED: You must call {nameof(WriteTimeEntryToTable)} after setting the time entry.
-- REQUIREMENT: If the user provides a 'Total' time, perform the subtraction for the 'Remaining' period and treat that result as its own ATOMIC UNIT.
-
-# MATH SCRATCHPAD
-If calculation is needed, use {nameof(SetRemainedTime)} function.
+- REQUIRED: You must call {nameof(AddTimeEntry)} after setting the time entry.
 ";
 
     public override AppDescription GetDescription() =>
@@ -53,38 +46,38 @@ If calculation is needed, use {nameof(SetRemainedTime)} function.
             new()
             {
                 Name = nameof(SetHours),
-                Description = "Sets the hour value for the PENDING entry. Range 0-23.",
+                Description = "Sets the hour value for the entry. Range 0-23.",
                 Parameters = [new() { Name = "hours", Description = "int" }],
             },
             new()
             {
                 Name = nameof(SetMinutes),
-                Description = "Sets the minute value for the PENDING entry. Range 0-59.",
+                Description = "Sets the minute value for the entry. Range 0-59.",
                 Parameters = [new() { Name = "minutes", Description = "int" }],
             },
             new()
             {
                 Name = nameof(SetSeconds),
-                Description = "Sets the second value for the PENDING entry. Range 0-59.",
+                Description = "Sets the second value for the entry. Range 0-59.",
                 Parameters = [new() { Name = "seconds", Description = "int" }],
             },
             new()
             {
                 Name = nameof(SetType),
-                Description = "Sets the category ('Work' or 'Break') for the PENDING entry.",
+                Description = "Sets the category ('Work' or 'Break') for the entry.",
                 Parameters = [new() { Name = "type", Description = "string" }],
             },
             new()
             {
-                Name = nameof(WriteTimeEntryToTable),
+                Name = nameof(AddTimeEntry),
                 Description =
-                    "Saves the PENDING entry to the permanent table. You MUST call this after setting Type/H/M/S and BEFORE starting the next entry.",
+                    "Saves the entry to the permanent table. You MUST call this after setting Type/H/M/S and BEFORE starting the next entry.",
                 Parameters = [],
             },
             new()
             {
                 Name = nameof(SetRemainedTime),
-                Description = "Sets the remaining Work time for the PENDING entry.",
+                Description = "Calculates the remaining Work time for the entry.",
                 Parameters = [],
             },
             new()
