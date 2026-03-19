@@ -1,6 +1,9 @@
-# Time Calculator
+# AI Time Calculator
 
 ### A basic concept of Time Data Filling application with **AI assistance** functionality built with **.NET 10** and **Blazor**.
+
+Runs on Ollama - qwen2.5-coder:7b.
+
 ### Uses own developed [AIOrchestrator NuGet package](https://github.com/notNullThen/AIOrchestratorDotNET).
 
 <img src="assets/screenshot.png" alt="App Screenshot" width="600" />
