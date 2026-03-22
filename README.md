@@ -1,6 +1,6 @@
-# AI Time Calculator
+# AI Time Manager
 
-### A basic concept of Time Data Filling application with **AI assistance** functionality built with **.NET 10** and **Blazor**.
+### A basic concept of Time Data Management application with **AI assistance** functionality built with **.NET 10** and **Blazor**.
 
 Runs on Ollama - qwen2.5-coder:7b.
 
