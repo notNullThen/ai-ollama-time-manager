@@ -18,7 +18,7 @@
         </div>
 
         <div class="mt-4">
-            <h6 class="text-secondary small fw-bold">Available Models</h6>
+            <h6 class="text-secondary small fw-bold">Available Models (click row to set Model Name)</h6>
             <div class="mb-2">
                 <input type="text" class="form-control form-control-sm" placeholder="Search models by name..." @bind="_searchQuery" @bind:event="oninput" />
             </div>
@@ -56,7 +56,6 @@
                                     Size 
                                     @if (_sortColumn == "Size") { <span class="ms-1">@(_sortAscending ? "↑" : "↓")</span> }
                                 </th>
-                                <th class="text-end pe-2"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,22 +63,18 @@
                             {
                                 @foreach (var model in filteredModels)
                                 {
-                                    <tr>
+                                    <tr @onclick="() => UseModel(model.Name)" style="cursor: pointer;">
                                         <td class="ps-2 fw-medium">@model.Name</td>
                                         <td class="text-muted">@(model.Details?.ParameterSize ?? "-")</td>
                                         <td class="text-muted">@(model.Details?.QuantizationLevel ?? "-")</td>
                                         <td class="text-muted">@(Math.Round((double)model.Size / 1024 / 1024 / 1024, 2)) GB</td>
-                                        <td class="text-end pe-2">
-                                            <button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.75rem;"
-                                                    @onclick="() => UseModel(model.Name)">Use</button>
-                                        </td>
                                     </tr>
                                 }
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="5" class="text-center py-2 small text-muted">No models match the search query.</td>
+                                    <td colspan="4" class="text-center py-2 small text-muted">No models match the search query.</td>
                                 </tr>
                             }
                         </tbody>
