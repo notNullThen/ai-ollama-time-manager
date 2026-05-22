@@ -1,0 +1,53 @@
+@using TimeCalculator.Core
+
+<div class="d-flex align-items-center gap-2">
+    <div class="fw-semibold text-nowrap">
+        Your daily work: @($"{TimeCalculator.DailyWorkHours} hours")
+    </div>
+
+    @if (!_isDailyWorkTimeInputVisible)
+    {
+        <button class="btn btn-sm @(TimeCalculator.DailyWorkHours > 0 ? "btn-outline-primary" : "btn-primary")"
+                @onclick="@(TimeCalculator.DailyWorkHours > 0 ? EditDailyWorkTime : ShowDailyWorkTimeInput)">
+            Edit
+        </button>
+    }
+    else
+    {
+        <div class="d-flex gap-2 align-items-center">
+            <input type="number" @bind="TimeCalculator.DailyWorkHours" min="1" class="form-control form-control-sm"
+                   style="width: 70px;" />
+            <button class="btn btn-sm btn-primary" disabled="@(TimeCalculator.DailyWorkHours <= 0)"
+                    @onclick="SetDailyWorkTime">
+                Set
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TimeCalculatorProgramm TimeCalculator { get; set; } = default!;
+    [Parameter] public EventCallback OnTimeCalculated { get; set; }
+
+    private bool _isDailyWorkTimeInputVisible;
+
+    private void EditDailyWorkTime()
+    {
+        _isDailyWorkTimeInputVisible = true;
+    }
+
+    private async Task SetDailyWorkTime()
+    {
+        _isDailyWorkTimeInputVisible = false;
+        TimeCalculator.CalculateTime();
+        if (OnTimeCalculated.HasDelegate)
+        {
+            await OnTimeCalculated.InvokeAsync();
+        }
+    }
+
+    private void ShowDailyWorkTimeInput()
+    {
+        _isDailyWorkTimeInputVisible = true;
+    }
+}

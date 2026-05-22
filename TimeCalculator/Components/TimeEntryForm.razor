@@ -134,47 +134,7 @@
 
     @if (ShowDebugTooling)
     {
-        <!-- AI Debug Details Sidebar -->
-        <div class="d-flex flex-column" style="flex: 1; min-width: 250px;">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="form-label mb-0">AI Debug Details</label>
-                <div>
-                    <button id="btn-autoscroll-debug" class="btn btn-primary btn-sm me-1">Auto-scroll: ON</button>
-                    <button class="btn btn-outline-primary btn-sm" onclick="window.copyToClipboard('ai-debug-raw', this)">
-                        Copy
-                    </button>
-                </div>
-            </div>
-            <div id="container-debug" class="form-control"
-                 style="height: 500px; overflow-y: auto; background-color: var(--tc-surface-2); border-color: var(--tc-border);">
-                <div style="padding: 5px; color: var(--tc-fg);">
-                    <JsonViewer JsonString="@AiInteraction.GetContext()" InitialExpandedDepth="3" />
-                </div>
-                <div id="ai-debug-raw"
-                     style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;"
-                     aria-hidden="true">@AiInteraction.GetContext()</div>
-            </div>
-        </div>
-
-        <!-- AI Management Prompt Sidebar -->
-        <div class="d-flex flex-column" style="flex: 1; min-width: 250px;">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="form-label mb-0">AI Management Prompt</label>
-                <button class="btn btn-outline-primary btn-sm"
-                        onclick="window.copyToClipboard('ai-management-prompt-raw', this)">
-                    Copy
-                </button>
-            </div>
-            <div class="form-control"
-                 style="height: 500px; overflow-y: auto; background-color: var(--tc-surface-2); border-color: var(--tc-border);">
-                <div style="padding: 5px; color: var(--tc-fg);">
-                    <JsonViewer JsonString="@AiInteraction.GetManagementPrompt()" InitialExpandedDepth="3" />
-                </div>
-                <div id="ai-management-prompt-raw"
-                     style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;"
-                     aria-hidden="true">@AiInteraction.GetManagementPrompt()</div>
-            </div>
-        </div>
+        <AiDebugPanels AiInteraction="AiInteraction" />
     }
 </div>
 

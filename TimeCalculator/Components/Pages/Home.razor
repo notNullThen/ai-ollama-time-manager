@@ -9,28 +9,7 @@
     <div class="header-row mb-4">
         @* Left Section: Daily Work *@
         <div class="header-left d-flex align-items-center gap-2">
-            <div class="fw-semibold text-nowrap">
-                Your daily work: @($"{timeCalculator.DailyWorkHours} hours")
-            </div>
-
-            @if (!_isDailyWorkTimeInputVisible)
-            {
-                <button class="btn btn-sm @(timeCalculator.DailyWorkHours > 0 ? "btn-outline-primary" : "btn-primary")"
-                        @onclick="@(timeCalculator.DailyWorkHours > 0 ? EditDailyWorkTime : ShowDailyWorkTimeInput)">
-                    Edit
-                </button>
-            }
-            else
-            {
-                <div class="d-flex gap-2 align-items-center">
-                    <input type="number" @bind="timeCalculator.DailyWorkHours" min="1" class="form-control form-control-sm"
-                           style="width: 70px;" />
-                    <button class="btn btn-sm btn-primary" disabled="@(timeCalculator.DailyWorkHours <= 0)"
-                            @onclick="SetDailyWorkTime">
-                        Set
-                    </button>
-                </div>
-            }
+            <DailyWorkTimeEditor TimeCalculator="timeCalculator" OnTimeCalculated="OnCalculatorChanged" />
         </div>
 
         @* Center Section: Title *@
@@ -54,74 +33,7 @@
 
     @if (_showSettings)
     {
-        <div class="card mb-4 border-primary shadow-sm" style="background-color: var(--tc-surface-1);">
-            <div class="card-body">
-                <h5 class="card-title text-primary"><i class="bi bi-gear-fill me-2"></i>AI Connection Settings</h5>
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <label class="form-label small">Ollama URL</label>
-                        <input type="text" class="form-control form-control-sm" @bind="timeCalculator.AiSettings.BaseUrl"
-                               placeholder="http://localhost:11434" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small">Model Name</label>
-                        <input type="text" class="form-control form-control-sm" @bind="timeCalculator.AiSettings.ModelName"
-                               placeholder="gemma4:e4b" />
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <h6 class="text-secondary small fw-bold">Available Models</h6>
-                    @if (_isLoadingModels)
-                    {
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    }
-                    else if (_modelsError != null)
-                    {
-                        <div class="alert alert-danger py-1 px-2 small">@_modelsError</div>
-                        <button class="btn btn-sm btn-outline-secondary mt-1" @onclick="LoadModelsAsync">Retry</button>
-                    }
-                    else if (_availableModels != null && _availableModels.Count > 0)
-                    {
-                        <div class="table-responsive border rounded" style="max-height: 200px; overflow-y: auto;">
-                            <table class="table table-sm table-hover align-middle mb-0 m-0">
-                                <tbody>
-                                    @foreach (var model in _availableModels)
-                                    {
-                                        <tr>
-                                            <td class="ps-2">
-                                                <div class="fw-medium">@model.Name</div>
-                                                @if (model.Details != null)
-                                                {
-                                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                                        @(model.Details.ParameterSize) • @(model.Details.QuantizationLevel) •
-                                                        @(Math.Round((double)model.Size / 1024 / 1024 / 1024, 2)) GB
-                                                    </div>
-                                                }
-                                            </td>
-                                            <td class="text-end pe-2">
-                                                <button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.75rem;"
-                                                        @onclick="() => UseModel(model.Name)">Use</button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else if (_availableModels != null && _availableModels.Count == 0)
-                    {
-                        <p class="small text-muted mb-0">No models found.</p>
-                    }
-                </div>
-
-                <div class="mt-3 d-flex justify-content-end">
-                    <button class="btn btn-primary btn-sm" @onclick="SaveSettings">Apply & Reload AI</button>
-                </div>
-            </div>
-        </div>
+        <AiSettings TimeCalculator="timeCalculator" OnSettingsSaved="SaveSettings" />
     }
 
     <TimeEntryForm @ref="_timeEntryForm" TimeCalculator="timeCalculator" OnChanged="OnCalculatorChanged"
@@ -150,26 +62,17 @@
 
     private TimeEntryForm? _timeEntryForm;
 
-    private bool _isDailyWorkTimeInputVisible;
     private bool _showDebugTooling = true;
     private bool _showSettings;
-
-    private List<OllamaModel>? _availableModels;
-    private string? _modelsError;
-    private bool _isLoadingModels;
 
     private void ToggleDebugTooling()
     {
         _showDebugTooling = !_showDebugTooling;
     }
 
-    private async Task ToggleSettings()
+    private void ToggleSettings()
     {
         _showSettings = !_showSettings;
-        if (_showSettings)
-        {
-            await LoadModelsAsync();
-        }
     }
 
     private void SaveSettings()
@@ -179,54 +82,10 @@
         OnCalculatorChanged();
     }
 
-    private void EditDailyWorkTime()
-    {
-        _isDailyWorkTimeInputVisible = true;
-    }
-
-    private void SetDailyWorkTime()
-    {
-        _isDailyWorkTimeInputVisible = false;
-        timeCalculator.CalculateTime();
-    }
-
-    private void ShowDailyWorkTimeInput()
-    {
-        _isDailyWorkTimeInputVisible = true;
-    }
-
     private Task OnCalculatorChanged()
     {
         StateHasChanged();
         return Task.CompletedTask;
-    }
-
-    private async Task LoadModelsAsync()
-    {
-        _isLoadingModels = true;
-        _modelsError = null;
-        StateHasChanged();
-
-        try
-        {
-            var baseUrl = string.IsNullOrWhiteSpace(timeCalculator.AiSettings.BaseUrl) ? "http://localhost:11434" :
-timeCalculator.AiSettings.BaseUrl;
-            _availableModels = await AIOrchestrator.OllamaClient.OllamaModels.GetModelsAsync(baseUrl);
-        }
-        catch (Exception ex)
-        {
-            _modelsError = $"Failed to load models: {ex.Message}";
-        }
-        finally
-        {
-            _isLoadingModels = false;
-            StateHasChanged();
-        }
-    }
-
-    private void UseModel(string modelName)
-    {
-        timeCalculator.AiSettings.ModelName = modelName;
     }
 
 }
