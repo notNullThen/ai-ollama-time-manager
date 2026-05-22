@@ -99,14 +99,20 @@
                     <label class="form-label mb-1">Explain it - we'll try to do it!</label>
                     <textarea @bind="AiInteraction.UserInput" class="form-control" style="height: 155px;"
                               placeholder="e.g., 'add 2 hours of work'"></textarea>
-                    <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" 
-                            @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
-                        <span>Do it!</span>
+                    <div class="d-flex gap-2 w-100">
+                        <button class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2" 
+                                @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
+                            <span>Do it!</span>
+                            @if (AiInteraction.IsBusy)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            }
+                        </button>
                         @if (AiInteraction.IsBusy)
                         {
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <button class="btn btn-danger" @onclick="AiInteraction.Cancel">Stop</button>
                         }
-                    </button>
+                    </div>
                 </div>
             }
         </div>
@@ -120,14 +126,20 @@
                 <label class="form-label mb-1">Explain it - we'll try to do it!</label>
                 <textarea @bind="AiInteraction.UserInput" class="form-control" style="height: 120px;"
                           placeholder="e.g., 'add 2 hours of work'"></textarea>
-                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" 
-                        @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
-                    <span>Do it!</span>
+                <div class="d-flex gap-2 w-100">
+                    <button class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2" 
+                            @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
+                        <span>Do it!</span>
+                        @if (AiInteraction.IsBusy)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        }
+                    </button>
                     @if (AiInteraction.IsBusy)
                     {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <button class="btn btn-danger" @onclick="AiInteraction.Cancel">Stop</button>
                     }
-                </button>
+                </div>
             </div>
         }
     </div>

@@ -14,6 +14,7 @@ public class AiInteraction
     private readonly AiAppFacade _aiFacade;
     private readonly IConsoleLogger _logger;
     private readonly TimeCalculatorProgramm _timeCalculator;
+    private CancellationTokenSource? _cts;
 
     public event EventHandler<List<FunctionCallResponse>>? OnContextUpdated;
     public event EventHandler? OnBusyChanged;
@@ -41,14 +42,24 @@ public class AiInteraction
         Init();
     }
 
+    public void Cancel()
+    {
+        _cts?.Cancel();
+    }
+
     public async Task AskAsync()
     {
         if (IsBusy)
             return;
         IsBusy = true;
+        _cts = new CancellationTokenSource();
         try
         {
-            await AiManager!.StartAsync(UserInput);
+            await AiManager!.StartAsync(UserInput, _cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            await _logger.LogInfoAsync("AI processing was stopped by the user.");
         }
         catch (Exception ex)
         {
@@ -58,6 +69,8 @@ public class AiInteraction
         finally
         {
             IsBusy = false;
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 
