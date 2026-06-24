@@ -2,7 +2,7 @@
 
 ### AI-powered Time Data Management with deterministic LLM function calling  
 
-### 🎬 YouTube Video Demo: https://youtu.be/ZoJmzfI-muc
+### 🎬 YouTube Video Demo: https://youtu.be/IwAvu0QdGu0
 
 ---
 
