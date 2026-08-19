@@ -6,6 +6,6 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AIOrchestrator" Version="0.1.12" />
+    <PackageReference Include="AIOrchestrator" Version="0.1.13" />
   </ItemGroup>
 </Project>
