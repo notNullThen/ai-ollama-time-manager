@@ -1,4 +1,4 @@
-# AI Time Manager
+# Local Agentic AI Demo
 
 ### This project is a demo of Local Agentic LLM Tools execution - implemented by AIOrchestrator NuGet package.
 

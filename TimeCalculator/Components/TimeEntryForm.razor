@@ -96,9 +96,10 @@
             {
                 <!-- AI Assistant Group (Side-by-side version) -->
                 <div class="d-flex flex-column gap-2 flex-grow-1" style="min-width: 280px;">
-                    <label class="form-label mb-1">Explain it - we'll try to do it!</label>
+                    <ModelPicker TimeCalculator="TimeCalculator" OnModelSelected="OnModelSelected"
+                                 Disabled="AiInteraction.IsBusy" />
                     <textarea @bind="AiInteraction.UserInput" class="form-control" style="height: 155px;"
-                              placeholder="e.g., 'add 2 hours of work'"></textarea>
+                              aria-label="AI instructions" placeholder="e.g., 'add 2 hours of work'"></textarea>
                     <div class="d-flex gap-2 w-100">
                         <button class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2" 
                                 @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
@@ -123,9 +124,10 @@
 
             <!-- AI Assistant Group (Original bottom version) -->
             <div class="d-flex flex-column gap-2">
-                <label class="form-label mb-1">Explain it - we'll try to do it!</label>
+                <ModelPicker TimeCalculator="TimeCalculator" OnModelSelected="OnModelSelected"
+                             Disabled="AiInteraction.IsBusy" />
                 <textarea @bind="AiInteraction.UserInput" class="form-control" style="height: 120px;"
-                          placeholder="e.g., 'add 2 hours of work'"></textarea>
+                          aria-label="AI instructions" placeholder="e.g., 'add 2 hours of work'"></textarea>
                 <div class="d-flex gap-2 w-100">
                     <button class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2" 
                             @onclick="AiInteraction.AskAsync" disabled="@AiInteraction.IsBusy">
@@ -227,6 +229,11 @@
     private int ParseHours(object? value) => Math.Min(23, ParseInt(value));
     private int ParseMinutes(object? value) => Math.Min(59, ParseInt(value));
     private string ParseString(object? value) => value?.ToString() ?? string.Empty;
+
+    private void OnModelSelected(string modelName)
+    {
+        ReInitializeAi();
+    }
 
     public void ReInitializeAi()
     {

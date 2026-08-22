@@ -110,3 +110,53 @@ window.setupAutoScroll = function(containerId, buttonId) {
         lastScrollTop = container.scrollTop;
     }
 };
+
+/**
+ * Packs variable-width buttons into as few flex rows as possible.
+ * Returns the optimized order without modifying the DOM.
+ */
+window.getPackedButtonOrder = function(container) {
+    if (!container || !container.parentElement) return [];
+
+    const buttons = Array.from(container.querySelectorAll(':scope > button'));
+    const availableWidth = container.parentElement.clientWidth;
+    const gap = parseFloat(getComputedStyle(container).columnGap) || 0;
+
+    if (buttons.length < 2 || availableWidth <= 0) {
+        return buttons.map(button => button.dataset.modelName);
+    }
+
+    const items = buttons.map((button, originalIndex) => ({
+        name: button.dataset.modelName,
+        width: button.getBoundingClientRect().width,
+        originalIndex
+    }));
+
+    // Largest-first best-fit packing fills gaps that normal flex wrapping leaves behind.
+    items.sort((left, right) =>
+        right.width - left.width || left.originalIndex - right.originalIndex);
+
+    const rows = [];
+    for (const item of items) {
+        let bestRow = null;
+        let smallestRemainder = Number.POSITIVE_INFINITY;
+
+        for (const row of rows) {
+            const usedWidth = row.width + gap + item.width;
+            const remainder = availableWidth - usedWidth;
+            if (remainder >= 0 && remainder < smallestRemainder) {
+                bestRow = row;
+                smallestRemainder = remainder;
+            }
+        }
+
+        if (bestRow) {
+            bestRow.items.push(item);
+            bestRow.width += gap + item.width;
+        } else {
+            rows.push({ items: [item], width: item.width });
+        }
+    }
+
+    return rows.flatMap(row => row.items.map(item => item.name));
+};
