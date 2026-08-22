@@ -92,7 +92,7 @@ Current time entries table:
                     {
                         Name = "type",
                         Description =
-                            $"Type of the time entry. MUST NOT be anything else than - {string.Join(", ", Enum.GetNames<TimeType>())}.",
+                            $"Type of the time entry. Should be only one of the options - {string.Join(", ", Enum.GetNames<TimeType>())}.",
                     },
                     new()
                     {
@@ -115,7 +115,7 @@ Current time entries table:
                     {
                         Name = "type",
                         Description =
-                            $"Type of the time entry. MUST NOT be anything else than - {string.Join(", ", Enum.GetNames<TimeType>())}.",
+                            $"Type of the time entry. Should be only one of the options - {string.Join(", ", Enum.GetNames<TimeType>())}.",
                     },
                     new()
                     {
@@ -154,7 +154,7 @@ Current time entries table:
         }
         catch (Exception)
         {
-            var validTypes = string.Join(", ", Enum.GetNames(typeof(TimeType)));
+            var validTypes = string.Join(", ", Enum.GetNames<TimeType>());
             throw new ArgumentException($"Type should be one of: {validTypes}. It was: {type}");
         }
     }
