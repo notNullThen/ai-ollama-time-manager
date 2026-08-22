@@ -103,7 +103,7 @@
         string.Equals(modelName, TimeCalculator.AiSettings.ModelName, StringComparison.OrdinalIgnoreCase);
 
     private string GetButtonClass(string modelName) =>
-        IsSelected(modelName) ? "btn btn-sm btn-primary fw-bold" : "btn btn-sm btn-outline-primary";
+        IsSelected(modelName) ? "btn btn-sm btn-primary" : "btn btn-sm btn-outline-primary";
 
     private async Task SelectModelAsync(string modelName)
     {
