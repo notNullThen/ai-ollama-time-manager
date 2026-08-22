@@ -7,7 +7,10 @@ using TimeCalculator.Core.Types;
 
 namespace TimeCalculator.AiCore;
 
-public sealed class AiAppFacade(TimeCalculatorProgramm timeCalculator) : AiAppFacadeBase
+public sealed class AiAppFacade(
+    TimeCalculatorProgramm timeCalculator,
+    bool multipleFunctionsAtOneResponse = false
+) : AiAppFacadeBase(multipleFunctionsAtOneResponse)
 {
     private const string TimeFormat = @"hh\:mm";
 

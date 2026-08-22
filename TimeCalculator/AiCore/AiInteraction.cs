@@ -11,7 +11,7 @@ public class AiInteraction
 
     public string UserInput { get; set; }
 
-    private readonly AiAppFacade _aiFacade;
+    private AiAppFacade _aiFacade;
     private readonly IConsoleLogger _logger;
     private readonly TimeCalculatorProgramm _timeCalculator;
     private CancellationTokenSource? _cts;
@@ -45,6 +45,17 @@ public class AiInteraction
     public void Cancel()
     {
         _cts?.Cancel();
+    }
+
+    public void SetMultipleFunctionsAtOneResponse(bool enabled)
+    {
+        if (_aiFacade.MultipleFunctionsAtOneResponse == enabled)
+        {
+            return;
+        }
+
+        _aiFacade = new AiAppFacade(_timeCalculator, enabled);
+        Init();
     }
 
     public async Task AskAsync()

@@ -25,6 +25,11 @@
             <button class="btn btn-sm btn-outline-primary" @onclick="ToggleDebugTooling">
                 @(_showDebugTooling ? "Hide Debug" : "Show Debug")
             </button>
+            <button class="btn btn-sm @(_multipleFunctionsAtOneResponse ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="ToggleMultipleFunctionsAtOneResponse" aria-pressed="@_multipleFunctionsAtOneResponse"
+                    title="Allow the AI to return multiple function calls in one response">
+                Multiple functions: @(_multipleFunctionsAtOneResponse ? "On" : "Off")
+            </button>
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" class="text-decoration-none"
                style="white-space: nowrap;">About</a>
             <ThemeToggle />
@@ -64,6 +69,7 @@
 
     private bool _showDebugTooling = true;
     private bool _showSettings;
+    private bool _multipleFunctionsAtOneResponse = false;
 
     private void ToggleDebugTooling()
     {
@@ -73,6 +79,12 @@
     private void ToggleSettings()
     {
         _showSettings = !_showSettings;
+    }
+
+    private void ToggleMultipleFunctionsAtOneResponse()
+    {
+        _multipleFunctionsAtOneResponse = !_multipleFunctionsAtOneResponse;
+        _timeEntryForm?.SetMultipleFunctionsAtOneResponse(_multipleFunctionsAtOneResponse);
     }
 
     private void SaveSettings()

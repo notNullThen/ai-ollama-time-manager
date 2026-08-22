@@ -240,4 +240,10 @@
         AiInteraction.Init();
         StateHasChanged();
     }
+
+    public void SetMultipleFunctionsAtOneResponse(bool enabled)
+    {
+        AiInteraction.SetMultipleFunctionsAtOneResponse(enabled);
+        StateHasChanged();
+    }
 }
