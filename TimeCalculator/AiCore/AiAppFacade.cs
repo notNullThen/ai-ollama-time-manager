@@ -106,7 +106,7 @@ Current time entries table:
             {
                 Name = nameof(ReplaceEntry),
                 Description =
-                    "Replaces existing entry with the new time, type and description. Returns the id of the replaced entry.",
+                    "Replaces existing entry with the new time, type and description. Returns the id of the replaced entry. Call ONLY if you need to CHANGE SOME EXISTING ENTRY.",
                 Parameters =
                 [
                     new() { Name = "guid", Description = "Id of the entry to replace." },
