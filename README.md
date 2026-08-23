@@ -9,7 +9,7 @@ This project demonstrates successful implementation of fully local functions (to
 
 The tools definition and execution ability is structured and handled by AIOrchestrator NuGet package.
 
-### 🎬 YouTube Video Demo: https://youtu.be/IwAvu0QdGu0
+### 🎬 YouTube Video Demo: https://youtu.be/qbJpvD6T8rs
 
 ---
 
