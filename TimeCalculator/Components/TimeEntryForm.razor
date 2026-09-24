@@ -4,6 +4,7 @@
 @using AIOrchestrator.Core.Types
 @inject IJSRuntime JSRuntime
 @inject IConsoleLogger ConsoleLogger
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 
 <div class="d-flex flex-column flex-lg-row gap-4 align-items-start">
     <!-- Main Form Controls -->
@@ -152,6 +153,45 @@
     }
 </div>
 
+@if (AiInteraction.IsHealingVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="healing-review-title">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="healing-review-title">AI error recovery</h5>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <h6>Healing constraints before this analysis</h6>
+                    <pre class="border rounded p-3 mb-3" style="white-space: pre-wrap; overflow-wrap: anywhere; max-height: 45vh; overflow-y: auto;">@(string.IsNullOrWhiteSpace(AiInteraction.SavedHealingConstraints) ? "No saved constraints yet." : AiInteraction.SavedHealingConstraints)</pre>
+                    @if (AiInteraction.IsAnalyzingError)
+                    {
+                        <p class="mb-2">Analyzing the error and generating a constraint…</p>
+                        <div class="spinner-border spinner-border-sm text-primary mb-3" role="status">
+                            <span class="visually-hidden">Analyzing error</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>Review the new constraint before the AI continues:</p>
+                        <pre class="border rounded p-3 mb-0" style="white-space: pre-wrap; overflow-wrap: anywhere;">@AiInteraction.HealingConstraint</pre>
+                    }
+                    <h6 class="mt-3">Full recovery prompt sent to the AI</h6>
+                    <pre class="border rounded p-3 mb-0" style="white-space: pre-wrap; overflow-wrap: anywhere; max-height: 45vh; overflow-y: auto;">@AiInteraction.HealingPrompt</pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" @onclick="AiInteraction.Cancel">Stop</button>
+                    @if (AiInteraction.IsAwaitingHealingReview)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="AiInteraction.ContinueHealing">Continue</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter, EditorRequired] public TimeCalculatorProgramm TimeCalculator { get; set; } = default!;
     [Parameter] public bool ShowDebugTooling { get; set; } = true;
@@ -162,9 +202,10 @@
 
     protected override void OnInitialized()
     {
-        AiInteraction = new AiInteraction(TimeCalculator, ConsoleLogger);
+        AiInteraction = new AiInteraction(TimeCalculator, ConsoleLogger, HostEnvironment.ContentRootPath);
         AiInteraction.OnContextUpdated += OnContextUpdated;
         AiInteraction.OnBusyChanged += (s, e) => InvokeAsync(StateHasChanged);
+        AiInteraction.OnHealingStateChanged += (s, e) => InvokeAsync(StateHasChanged);
 
         AiInteraction.UserInput = "ok so started at 08:00 working on refactoring auth module, then at eleven twenty took a break, then at 11:40 back to work did frontend component cleanup, then at 13:45 lunch, then at 14:30 back to work till end on api endpoint documentation";
     }

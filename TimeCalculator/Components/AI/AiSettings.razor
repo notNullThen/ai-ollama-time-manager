@@ -15,6 +15,20 @@
                 <input type="text" class="form-control form-control-sm" @bind="TimeCalculator.AiSettings.ModelName"
                        placeholder="ministral-3:3b" />
             </div>
+            <div class="col-12">
+                <label class="form-label small">Healing constraints file path</label>
+                <input type="text" class="form-control form-control-sm" @bind="TimeCalculator.AiSettings.HealingConstraintsFilePath"
+                       placeholder="./ai-constraints.md" />
+                <div class="form-text">Path on the server. Relative paths use the application's content root.</div>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="pause-healing-review"
+                           @bind="TimeCalculator.AiSettings.PauseForHealingReview" />
+                    <label class="form-check-label" for="pause-healing-review">Pause to review healing constraints</label>
+                </div>
+                <div class="form-text">Show error analysis and wait for Continue after each new constraint.</div>
+            </div>
         </div>
 
         <div class="mt-4">

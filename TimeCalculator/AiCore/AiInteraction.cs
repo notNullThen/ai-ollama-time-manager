@@ -14,10 +14,20 @@ public class AiInteraction
     private AiAppFacade _aiFacade;
     private readonly IConsoleLogger _logger;
     private readonly TimeCalculatorProgramm _timeCalculator;
+    private readonly string _contentRootPath;
     private CancellationTokenSource? _cts;
+    private TaskCompletionSource? _healingReviewCompletion;
 
     public event EventHandler<List<FunctionCallResponse>>? OnContextUpdated;
     public event EventHandler? OnBusyChanged;
+    public event EventHandler? OnHealingStateChanged;
+
+    public bool IsAnalyzingError { get; private set; }
+    public string? SavedHealingConstraints { get; private set; }
+    public string? HealingPrompt { get; private set; }
+    public string? HealingConstraint { get; private set; }
+    public bool IsAwaitingHealingReview => _healingReviewCompletion is not null;
+    public bool IsHealingVisible => IsAnalyzingError || IsAwaitingHealingReview;
 
     private bool _isBusy;
     public bool IsBusy
@@ -33,11 +43,16 @@ public class AiInteraction
         }
     }
 
-    public AiInteraction(TimeCalculatorProgramm timeCalculator, IConsoleLogger logger)
+    public AiInteraction(
+        TimeCalculatorProgramm timeCalculator,
+        IConsoleLogger logger,
+        string contentRootPath
+    )
     {
         _aiFacade = new AiAppFacade(timeCalculator);
         _logger = logger;
         _timeCalculator = timeCalculator;
+        _contentRootPath = contentRootPath;
         UserInput = string.Empty;
         Init();
     }
@@ -46,6 +61,8 @@ public class AiInteraction
     {
         _cts?.Cancel();
     }
+
+    public void ContinueHealing() => _healingReviewCompletion?.TrySetResult();
 
     public void SetMultipleFunctionsAtOneResponse(bool enabled)
     {
@@ -79,6 +96,7 @@ public class AiInteraction
         }
         finally
         {
+            ClearHealingState();
             IsBusy = false;
             _cts?.Dispose();
             _cts = null;
@@ -101,10 +119,65 @@ public class AiInteraction
             appInstance: _aiFacade,
             options: new() { Temperature = 0.0f },
             ollamaBaseUrl: _timeCalculator.AiSettings.BaseUrl,
-            ollamaHttpTimeout: TimeSpan.FromMinutes(3)
+            ollamaHttpTimeout: TimeSpan.FromMinutes(3),
+            healingConstraintsFilePath: string.IsNullOrWhiteSpace(
+                _timeCalculator.AiSettings.HealingConstraintsFilePath
+            )
+                ? null
+                : Path.GetFullPath(
+                    _timeCalculator.AiSettings.HealingConstraintsFilePath,
+                    _contentRootPath
+                )
         );
+        if (_timeCalculator.AiSettings.PauseForHealingReview)
+        {
+            AiManager.HealingStarted += OnHealingStarted;
+            AiManager.OnConstraintGeneratedAsync = OnConstraintGeneratedAsync;
+        }
         _aiFacade.OnExit = () => IsBusy = false;
         AiManager.ContextHandler.OnContextUpdated += InternalOnContextUpdated;
+    }
+
+    private void OnHealingStarted(object? sender, string prompt)
+    {
+        IsAnalyzingError = true;
+        SavedHealingConstraints = (sender as AiManager)?.LearnedConstraints;
+        HealingPrompt = prompt;
+        HealingConstraint = null;
+        OnHealingStateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task OnConstraintGeneratedAsync(
+        string constraint,
+        CancellationToken cancellationToken
+    )
+    {
+        var completion = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+        _healingReviewCompletion = completion;
+        HealingConstraint = constraint;
+        IsAnalyzingError = false;
+        OnHealingStateChanged?.Invoke(this, EventArgs.Empty);
+
+        try
+        {
+            await completion.Task.WaitAsync(cancellationToken);
+        }
+        finally
+        {
+            ClearHealingState();
+        }
+    }
+
+    private void ClearHealingState()
+    {
+        IsAnalyzingError = false;
+        SavedHealingConstraints = null;
+        HealingPrompt = null;
+        HealingConstraint = null;
+        _healingReviewCompletion = null;
+        OnHealingStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void InternalOnContextUpdated(object? sender, List<FunctionCallResponse> e)

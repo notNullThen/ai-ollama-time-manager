@@ -4,4 +4,6 @@ public class AiSettings
 {
     public string BaseUrl { get; set; } = "http://localhost:11434";
     public string ModelName { get; set; } = "ministral-3:3b";
+    public string HealingConstraintsFilePath { get; set; } = "./ai-constraints.md";
+    public bool PauseForHealingReview { get; set; } = true;
 }

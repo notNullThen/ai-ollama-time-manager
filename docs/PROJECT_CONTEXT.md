@@ -6,18 +6,18 @@ This document is a durable codebase map for future development sessions. It summ
 
 ## Product and runtime
 
-The application is a local agentic-AI demo that builds a working-day time report from either manual inputs or natural-language instructions. A local Ollama model decides which application functions to call; the `AIOrchestrator` NuGet package provides the orchestration and tool-execution loop.
+The application is a local agentic-AI demo that builds a working-day time report from either manual inputs or natural-language instructions. A local Ollama model decides which application functions to call; the sibling `AIOrchestrator` project provides the orchestration and tool-execution loop.
 
 Current technical shape:
 
 - One ASP.NET Core/Blazor project: `TimeCalculator/TimeCalculator.csproj`
 - Target framework: .NET 10 (`net10.0`)
 - UI mode: Interactive Server, configured in `Program.cs` and `Components/App.razor`
-- AI dependency: `AIOrchestrator` package version `0.1.2`
+- AI dependency: sibling `../ai-orchestrator-dotnet/AIOrchestrator` project through `ProjectReference`; library changes compile with the app without a NuGet publish
 - CSS/layout: Bootstrap plus project styles in `wwwroot/app.css` and page/layout scoped CSS
 - External AI service: Ollama, default URL `http://localhost:11434`
 - Default model in code: `ministral-3:3b`
-- Storage: none; time entries and AI settings live only in the current component/circuit memory
+- Storage: time entries and AI settings live only in the current component/circuit memory; AIOrchestrator can write learned healing constraints to a Markdown file
 
 The README still mentions `gemma4:e4b` in parts of its setup/overview, while `Core/Types/AiSettings.cs` currently defaults to `ministral-3:3b`. Treat the code as authoritative unless intentionally reconciling the documentation.
 
@@ -116,13 +116,14 @@ Inputs in `TimeEntryForm.razor` clamp hours to 23 and minutes to 59. Invalid num
 
 - current `AiSettings.ModelName`
 - current `AiSettings.BaseUrl`
+- current `AiSettings.HealingConstraintsFilePath` (defaults to `./ai-constraints.md`, resolved against the app content root, so a local run reads `TimeCalculator/ai-constraints.md` when it exists)
 - temperature `0.0`
 - a three-minute Ollama HTTP timeout
 - the current `AiAppFacade`
 
-`AskAsync()` prevents concurrent runs with `IsBusy`, creates a cancellation token source, invokes `AiManager.StartAsync`, logs cancellation/errors, and raises busy-state events for UI refresh. `Cancel()` requests cancellation.
+`AskAsync()` prevents concurrent runs with `IsBusy`, creates a cancellation token source, invokes `AiManager.StartAsync`, logs cancellation/errors, and raises busy-state events for UI refresh. `Cancel()` requests cancellation. `PauseForHealingReview` is enabled by default. When enabled in Settings, `AiInteraction` subscribes to the manager's healing-start event, which carries the exact prompt sent for recovery, and installs a constraint callback. The dialog first shows a snapshot of the loaded healing constraints from before the new line is appended, followed by the full recovery prompt and any newly generated constraint. It awaits Continue before the next iteration. Stop cancels that wait and closes the dialog. With the checkbox off, healing remains automatic.
 
-Changing model/settings calls `Init()` and replaces the manager, so previous AI conversation/context is discarded. Toggling “Multiple functions” recreates both the facade and manager for the same domain model and also discards previous AI context. The report entries remain because the shared `TimeCalculatorProgramm` is retained.
+Changing model/settings calls `Init()` and replaces the manager, so previous AI conversation/context is discarded. Toggling “Multiple functions” recreates both the facade and manager for the same domain model and also discards previous AI context. The report entries remain because the shared `TimeCalculatorProgramm` is retained. AIOrchestrator loads an existing healing constraints Markdown file at run start and again before analyzing an error. Its recovery prompt includes the user task, successful-call history, functions, instructions and constraints, latest model output, failed call, and error cause. New constraints are appended to the file; unlike AI settings and report entries, it can remain on disk across sessions. The default file is ignored by Git.
 
 ### `AiAppFacade`
 
@@ -173,12 +174,11 @@ The README notes that binding the web server for other devices and the Docker Co
 From the repository root:
 
 ```bash
-dotnet restore TimeCalculator.slnx
 dotnet build TimeCalculator.slnx
 dotnet run --project TimeCalculator
 ```
 
-The launch profile serves HTTP on port 5211 and HTTPS on 7199. Docker Compose maps host port 8080 to container port 8080.
+The sibling `ai-orchestrator-dotnet` checkout is required for local builds. Docker Compose uses the parent directory as build context to include both projects. `dotnet build` and `dotnet run` restore dependencies automatically unless `--no-restore` is passed; `dotnet restore TimeCalculator.slnx` is optional as a separate step. The launch profile serves HTTP on port 5211 and HTTPS on 7199. Docker Compose maps host port 8080 to container port 8080.
 
 For AI smoke testing, run Ollama locally, ensure the configured model is pulled, open the app, select the model, submit a prompt, and verify both the table mutation and debug context. Cancellation, model changes, and the multiple-functions toggle are separate lifecycle paths worth checking when touched.
 
